@@ -19,12 +19,13 @@ namespace ZettaCode.Web.Services.Tracking.Client.Examples
     {
         public class GetTrackListRequest
         {
-            public string AllowedCarrierCodes { get; set; }
+            public List<string> AllowedCarrierCodes { get; set; }
             public List<SearchParameter> SearchParameters { get; set; }
             public string WebServiceKey { get; set; }
 
             public GetTrackListRequest()
             {
+                AllowedCarrierCodes = new List<string>();
                 SearchParameters = new List<SearchParameter>();
             }
         }
@@ -47,6 +48,11 @@ namespace ZettaCode.Web.Services.Tracking.Client.Examples
                 /* Enter your Web Service Key here */
                 getTrackListRequest.WebServiceKey = "";
 
+                /* List of carrier codes the tracking results will be restricted to. 
+                 * Leave blank to enable all supported carriers.
+                */
+                getTrackListRequest.AllowedCarrierCodes.Add("");
+
                 /* Add up to 50 SearchParameters */
                 getTrackListRequest.SearchParameters.Add(new SearchParameter()
                 {
@@ -61,7 +67,7 @@ namespace ZettaCode.Web.Services.Tracking.Client.Examples
                 var jsondata = JsonConvert.SerializeObject(getTrackListRequest);
 
                 /* POST the request to the web service */
-                var url = "https://ws.packagemapping.info/Services/PackageMapping/ITrackService/rest/json/GetTrackList";
+                var url = "https://ws.packagemapping.com/Services/PackageMapping/ITrackService/rest/json/GetTrackList";
                 var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
                 httpWebRequest.ContentType = "application/json; charset=utf-8";
                 httpWebRequest.Accept = "application/json";
@@ -77,7 +83,10 @@ namespace ZettaCode.Web.Services.Tracking.Client.Examples
                 /* Get the response data */
                 var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
 
-                /* Populate the dynamic JSON object with the response */
+                /* Populate the dynamic JSON object with the response.
+                 * We are using dynamic objects so that if new properties are added 
+                 * to the web service, it will not break this client code.
+                 */
                 dynamic getTrackListResponse = null;
                 using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
                 {
